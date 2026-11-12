@@ -502,11 +502,19 @@ Values with_event(const Values& values, int event) {
     return out;
 }
 
-int clone_budget(int free_slots, int level) {
+int pool_reserve(double enemy_count, double bolts) {
+    const double more_enemies = enemy_count > 1.0 ? enemy_count - 1.0 : 0.0;
+    const double more_bolts = bolts > 1.0 ? bolts - 1.0 : 0.0;
+    return k_pool_reserve + static_cast<int>(std::lround(
+               more_enemies * k_reserve_per_enemy_step + more_bolts * k_reserve_per_bolt_step
+           ));
+}
+
+int clone_budget(int free_slots, int level, int reserve) {
     const int level_use = level == kGasparLevel  ? k_gaspar_sparks
                           : level == kBlargLevel ? k_blarg_spawns
                                                  : 0;
-    const int b = free_slots - k_pool_reserve - level_use;
+    const int b = free_slots - reserve - level_use;
     return b > 0 ? b : 0;
 }
 

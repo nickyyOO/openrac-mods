@@ -143,7 +143,11 @@ keep 255); the mod reads the pool's size from the game as each level loads.
 When the pool is full the game cannot make what it wants, and on Gaspar its
 lava sparks nearly fill a console's 255 already. So the copies take only what
 the game can spare: **160 slots always stay free** for the game, and a level's
-copies take at most the rest (95 of 255, 607 of 767). An enemy whose own data
+copies take at most the rest (95 of 255, 607 of 767). More enemies and more
+bolts make the game spawn more (their shots, the bolts they drop), so the
+reserve grows by 32 slots for each step over 1 of the enemy count and of the
+bolt drops: 4 times the enemies and 5 times the bolts keep 384. A console-sized
+pool of 255 then gets fewer copies, or none. An enemy whose own data
 is larger than a spawned object's place (0x80 bytes) costs slots for that too,
 and nearly every enemy's is (0x1C0 to 0x460 bytes): a copy takes 5 to 10
 slots, so a level of 255 gets about 11 to 17 copies at most (Rilgar's smaller

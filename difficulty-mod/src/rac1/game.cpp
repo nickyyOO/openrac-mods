@@ -1075,7 +1075,8 @@ void adjust_enemies(int level) {
     }
 
     const int free = dm::count_free(mem(), pool);
-    const int budget = dm::clone_budget(free, level);
+    const int reserve = dm::pool_reserve(k, s_level[dm::BOLTS]);
+    const int budget = dm::clone_budget(free, level, reserve);
     dm::ClonePlan plan = dm::plan_clones(asks, budget);
     gaddr room = 0;
     uint32_t room_left = 0;
@@ -1130,7 +1131,7 @@ void adjust_enemies(int level) {
     s_mod->info(
         "level " + std::to_string(level) + ": " + std::to_string(made) + " copies of "
         + std::to_string(eligible) + " enemies (" + std::to_string(free) + " free slots, room for "
-        + std::to_string(budget) + " beside the " + std::to_string(dm::k_pool_reserve)
+        + std::to_string(budget) + " beside the " + std::to_string(reserve)
         + " kept for the game; " + std::to_string(plan.pvar_slots) + " reserved for pvars; "
         + std::to_string(no_spot) + " without a clear spot)"
     );

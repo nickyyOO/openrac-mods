@@ -555,7 +555,7 @@ int main(int argc, char** argv) {
     query(&info);
     // The interface its manifest names (1.12), whatever the SDK it was built with.
     CHECK(info.api_major == OPENRAC_MOD_API_MAJOR && info.api_minor == 12);
-    CHECK(std::strcmp(info.id, "difficulty") == 0 && std::strcmp(info.version, "1.5.0") == 0);
+    CHECK(std::strcmp(info.id, "difficulty") == 0 && std::strcmp(info.version, "1.5.1") == 0);
     g_mem = static_cast<std::uint8_t*>(std::calloc(1, kMemory));
     CHECK(g_mem != nullptr);
     g_handle = reinterpret_cast<openrac_mod*>(&info);
@@ -743,11 +743,16 @@ int main(int argc, char** argv) {
     g_floats = {{"enemy_count", 4.0}};
     CHECK(load_with("pal"));
     load_gameplay = (LoadFn)hook("rac1.level.load_gameplay");
-    // 120 troopers asking three copies each: 95 slots of 255 may go, 160 stay free.
+    // 120 troopers asking three copies each. Four times the enemies keep 256 free for the game: a
+    // console's pool of 255 gets no copies, one of 511 gets 255.
+    const int reserve = dm::pool_reserve(4.0, 1.0);
     lay_level(std::vector<Placed>(120, Placed{427, 0xFF, 0, 0x60}), 256);
     load_gameplay(1);
-    CHECK(g_created == 255 - dm::k_pool_reserve && g_built == g_created);
-    CHECK(free_slots() >= dm::k_pool_reserve);
+    CHECK(g_created == 0 && free_slots() == 255);
+    lay_level(std::vector<Placed>(120, Placed{427, 0xFF, 0, 0x60}), 512);
+    load_gameplay(1);
+    CHECK(g_created == 511 - reserve && g_built == g_created);
+    CHECK(free_slots() >= reserve);
     // A copy: the original's class and pvars (its own slot's), beside it, no save id, no bolts.
     const std::uint32_t spare = pool_word(1);
     CHECK(
@@ -760,11 +765,11 @@ int main(int argc, char** argv) {
     CHECK(std::sqrt(dx * dx + dy * dy) >= 2.4f && std::sqrt(dx * dx + dy * dy) <= 4.1f);
     CHECK(get<float>(spare + 0x18u) == 1.5f);  // the original's height over the floor
     // Large pvars: room from the pool's tail, which CreateMoby then never hands out.
-    lay_level(std::vector<Placed>(40, Placed{427, 0xFF, 0, 0x210}), 256);
+    lay_level(std::vector<Placed>(40, Placed{427, 0xFF, 0, 0x210}), 512);
     const std::uint32_t end_before = pool_word(2);
     load_gameplay(1);
     CHECK(g_created > 0 && pool_word(2) < end_before);
-    CHECK(free_slots() >= dm::k_pool_reserve);
+    CHECK(free_slots() >= reserve);
     const std::uint32_t spare40 = pool_word(1);
     const std::uint32_t pv = get<std::uint32_t>(spare40 + 0x78u);
     CHECK(pv >= get<std::uint32_t>(d.pool + 0x10u) + (pool_word(2) - spare40) / 2u);
@@ -772,7 +777,7 @@ int main(int argc, char** argv) {
     // The flags of the discs' own records: nearly every enemy is in play before its mission is
     // done (1), after it (2) or both (3), and is copied all the same, with its mission.
     lay_level(
-        {Placed{427, 0xFF, 1, 0x40}, Placed{427, 0xFF, 2, 0x40}, Placed{427, 0xFF, 3, 0x40}}, 256
+        {Placed{427, 0xFF, 1, 0x40}, Placed{427, 0xFF, 2, 0x40}, Placed{427, 0xFF, 3, 0x40}}, 512
     );
     g_mem[kBase + 0xB0] = 4;
     load_gameplay(1);
@@ -784,7 +789,7 @@ int main(int argc, char** argv) {
     // A link field left at -1 names no moby: copied. One naming a moby: neither is copied.
     lay_level(
         {Placed{427, 0xFF, 3, 0x40}, Placed{427, 0xFF, 3, 0x40}, Placed{427, 0xFF, 3, 0x40}},
-        256,
+        512,
         {Link{0, 0x10, -1}, Link{1, 0x10, 2}}
     );
     load_gameplay(1);
@@ -853,7 +858,7 @@ int main(int argc, char** argv) {
     const std::vector<std::uint8_t> host_bytes = g_published;
     load_gameplay = (LoadFn)hook("rac1.level.load_gameplay");
     record_death = (void (*)(std::uint32_t, int32_t, int32_t))hook("rac1.moby.record_death");
-    lay_level(std::vector<Placed>(8, Placed{427, 0xFF, 0, 0x40}), 256);
+    lay_level(std::vector<Placed>(8, Placed{427, 0xFF, 0, 0x40}), 512);
     load_gameplay(1);
     CHECK(g_created > 0);
 
@@ -864,7 +869,7 @@ int main(int argc, char** argv) {
     load_gameplay = (LoadFn)hook("rac1.level.load_gameplay");
     record_death = (void (*)(std::uint32_t, int32_t, int32_t))hook("rac1.moby.record_death");
     g_rules_fn(nullptr, host_bytes.data(), static_cast<std::uint32_t>(host_bytes.size()));
-    lay_level(std::vector<Placed>(8, Placed{427, 0xFF, 0, 0x40}), 256);
+    lay_level(std::vector<Placed>(8, Placed{427, 0xFF, 0, 0x40}), 512);
     load_gameplay(1);
     CHECK(g_created == 0 && g_deleted == 0);
     put<int16_t>(kBase + 0xB4u, 10);
@@ -872,7 +877,7 @@ int main(int argc, char** argv) {
     record_death(kBase, 0, 0);
     CHECK(g_bolts_seen[0] == 30);
     // A respawn, the same load again: still none of its own.
-    lay_level(std::vector<Placed>(8, Placed{427, 0xFF, 0, 0x40}), 256);
+    lay_level(std::vector<Placed>(8, Placed{427, 0xFF, 0, 0x40}), 512);
     load_gameplay(1);
     CHECK(g_created == 0 && g_deleted == 0);
     // Removals below 1 are the host's too.
@@ -880,12 +885,12 @@ int main(int argc, char** argv) {
     fewer.sliders[dm::ENEMY_COUNT] = 0.5;
     const std::vector<std::uint8_t> bytes = dm::encode_party_rules(fewer);
     g_rules_fn(nullptr, bytes.data(), static_cast<std::uint32_t>(bytes.size()));
-    lay_level(std::vector<Placed>(200, Placed{427, 0xFF, 0, 0x40}), 256);
+    lay_level(std::vector<Placed>(200, Placed{427, 0xFF, 0, 0x40}), 512);
     load_gameplay(1);
     CHECK(g_created == 0 && g_deleted == 0);
     // The party gone: this game's own settings again, here retail.
     g_rules_fn(nullptr, nullptr, 0);
-    lay_level(std::vector<Placed>(8, Placed{427, 0xFF, 0, 0x40}), 256);
+    lay_level(std::vector<Placed>(8, Placed{427, 0xFF, 0, 0x40}), 512);
     load_gameplay(1);
     CHECK(g_created == 0 && g_deleted == 0);
     put<int16_t>(kBase + 0xB4u, 10);

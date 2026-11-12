@@ -159,8 +159,15 @@ constexpr int k_gaspar_sparks = 255;
 // landing (measured on PAL: the first free slot goes from 2 to 195 of 255). The copies leave them
 // room too, or the landing has no slot for the ship and Clank.
 constexpr int k_blarg_spawns = 193;
-// Slots the copies may take on a level with free_slots free.
-int clone_budget(int free_slots, int level);
+// More enemies and more bolts spawn more of their own (shots, debris, bolts): the reserve grows with
+// each slider over 1 by this many slots a step. Estimates: the 160 alone ran out on Eudora with 4
+// times the enemies and 5 times the bolts, and the ship then had no slot for Ratchet and Clank.
+constexpr int k_reserve_per_enemy_step = 32;
+constexpr int k_reserve_per_bolt_step = 32;
+// The free slots kept for the game with these enemy count and bolt drop sliders.
+int pool_reserve(double enemy_count, double bolts);
+// Slots the copies may take on a level with free_slots free, reserve of them kept for the game.
+int clone_budget(int free_slots, int level, int reserve = k_pool_reserve);
 // Extra slots a copy whose pvars are size bytes needs for them (a spawned moby has 0x80).
 int pvar_slots(int size);
 

@@ -305,6 +305,15 @@ static void budget() {
     // Blarg Station keeps room for its own spawns: no copies in its pool of 255.
     CHECK(clone_budget(253, 6) == 0);
     CHECK(clone_budget(1000, 6) == 1000 - k_pool_reserve - k_blarg_spawns);
+    // More enemies and bolts keep more for the game; at or under 1 the reserve stays 160.
+    CHECK(pool_reserve(1.0, 1.0) == k_pool_reserve && pool_reserve(0.5, 0.0) == k_pool_reserve);
+    CHECK(pool_reserve(2.0, 1.0) == k_pool_reserve + k_reserve_per_enemy_step);
+    CHECK(pool_reserve(1.0, 3.0) == k_pool_reserve + 2 * k_reserve_per_bolt_step);
+    // Eudora's crash: 4 times the enemies, 5 times the bolts, 765 free.
+    const int eudora = pool_reserve(4.0, 5.0);
+    CHECK(eudora == k_pool_reserve + 3 * k_reserve_per_enemy_step + 4 * k_reserve_per_bolt_step);
+    CHECK(clone_budget(765, 4, eudora) == 765 - eudora);
+    CHECK(clone_budget(255, 4, pool_reserve(2.0, 1.0)) == 255 - pool_reserve(2.0, 1.0));
     CHECK(pvar_slots(0) == 0 && pvar_slots(0x80) == 0);
     CHECK(
         pvar_slots(0x81) == 2 && pvar_slots(0x100) == 2 && pvar_slots(0x101) == 3
