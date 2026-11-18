@@ -10,5 +10,7 @@ Its binds, presets and settings are on the launcher's **Mods** tab, under
 [docs/port/KEYBOARD_MOUSE.md](https://github.com/OpenRAC/OpenRAC/blob/develop/docs/port/KEYBOARD_MOUSE.md)
 and `port/game/rac1/keyboard_mouse/` in the OpenRAC repository.
 
-An installed copy of this mod is not loaded any more and the launcher no
-longer lists it. Set your binds again on the built-in entry.
+The mod is taken off the list (index/revoked.json); its manifest stays so
+its page on openrac.dev says why. An installed copy is not loaded any more
+and the launcher no longer lists it. Set your binds again on the built-in
+entry.

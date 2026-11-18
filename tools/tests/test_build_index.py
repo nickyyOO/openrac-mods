@@ -489,7 +489,10 @@ class Schema(unittest.TestCase):
         entries, errors = b.load_entries(ROOT)
         self.assertEqual(errors, [])
         self.assertGreaterEqual(len(entries), 11)
-        self.assertEqual(b.load_revoked(ROOT), [])
+        # Every mod taken off the list is one the index still holds, so its page says why.
+        ids = {e["id"] for e in entries}
+        for r in b.load_revoked(ROOT):
+            self.assertIn(r["id"], ids)
 
 
 class Workflow(unittest.TestCase):

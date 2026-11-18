@@ -1,0 +1,22 @@
+{
+  "description": "Built into OpenRAC now: Ratchet & Clank plays with a keyboard and mouse out of the box. This mod is no longer needed.",
+  "tags": [
+    "controls",
+    "accessibility"
+  ],
+  "impact": [],
+  "aiAssisted": true,
+  "links": {
+    "bugs": "https://github.com/OpenRAC/openrac-mods/issues"
+  },
+  "recommends": [],
+  "suggests": [],
+  "aliases": [],
+  "featured": false,
+  "media": {
+    "icon": null,
+    "banner": null,
+    "screenshots": [],
+    "videos": []
+  }
+}

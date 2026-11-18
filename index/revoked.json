@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": "keyboard-mouse",
+    "versions": [
+      "*"
+    ],
+    "reason": "It is built into OpenRAC now: Ratchet & Clank plays with a keyboard and mouse out of the box, with the same binds and settings on the launcher's Mods tab, under Built in."
+  }
+]
