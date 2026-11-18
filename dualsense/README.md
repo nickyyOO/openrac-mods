@@ -216,7 +216,7 @@ logic test.
 ## What it does not do
 
 - **No gyroscope.** Ratchet & Clank 1 has no use for one, and the
-  `keyboard-mouse` mod already turns the mouse into the camera.
+  keyboard and mouse built into OpenRAC already turn the mouse into the camera.
 - **No adaptive triggers.** They would restore nothing the PlayStation 2 had:
   Ratchet & Clank 1's only analog button input is the pressure of Cross and
   Square while Ratchet is underwater, and a DualSense's face buttons are

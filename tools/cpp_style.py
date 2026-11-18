@@ -43,7 +43,6 @@ TREES = (
     "difficulty-mod",
     "dualsense",
     "item-randomizer",
-    "keyboard-mouse",
     "live-splits",
     "lock-strafe",
     "multiplayer",
