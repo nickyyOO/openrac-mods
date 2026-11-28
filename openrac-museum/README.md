@@ -75,14 +75,14 @@ by `python3 tools/fx.py`.
 ## Build the map file
 
 For maintainers. Needs Python 3 with numpy and Pillow, an OpenRAC checkout and an OpenRAC Editor
-checkout side by side, and a PAL disc image:
+checkout side by side, a disc image (PAL or NTSC-U) and the levels OpenRAC extracted from it:
 
 ```
-python3 tools/build_map.py DISC.iso OUT_FOLDER --editor path/to/OpenRAC-Editor
+python3 tools/build_map.py DISC.iso OUT_FOLDER --levels path/to/OpenRAC/assets/port/rac1/pal --editor path/to/OpenRAC-Editor
 ```
 
 It reads levels 11 and 2 from the disc into a temporary folder, writes the museum there
 (`tools/museum.py`), sets every crate, lamp, rock and plant down on the ground with OpenRAC
 Editor's placement (`placement.py`), bakes the light with bounced light and a soft sun, gives the
 hero light zones from that bake (darker in the house and in shade, `tools/museum_light.py`), and exports it with OpenRAC Editor's `map export`. Upload the
-`.openrac-map` it writes to a release. Never commit it with disc files.
+`.openrac-map` it writes to a release: players add it in OpenRAC's Mods and play. Never commit it with disc files.

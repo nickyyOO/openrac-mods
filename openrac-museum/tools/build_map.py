@@ -1,18 +1,18 @@
 """Builds OpenRAC Museum as a shared map: one .openrac-map file that players add in the launcher.
 
-    python3 build_map.py DISC OUT_FOLDER [--editor OPENRAC_EDITOR_CHECKOUT]
+    python3 build_map.py DISC OUT_FOLDER --levels LEVELS [--editor OPENRAC_EDITOR_CHECKOUT]
 
 DISC is a Ratchet & Clank disc image (.iso). Level 11 (Pokitaru), level 2 (Aridia) and the levels
 the exhibits come from are read from it into a temporary folder, the museum is written into that copy of level 11, and the copy is
 exported with OpenRAC Editor's `map export`. Your own level projects are never touched.
 
-The map holds only what these scripts made. Textures and models of the game are named by level,
-path and sha256, and the player's own disc gives them back when they add the map.
+The map holds only what these scripts made. Every byte of the game is named by the player's own
+disc and the levels OpenRAC extracted from it (LEVELS, OpenRAC's assets/port/rac1/<disc>), which
+give it back when they add the map in OpenRAC.
 OPENRAC_ROOT must point at an OpenRAC checkout (the editor's tools use its extractor).
 """
 
 import argparse
-import inspect
 import subprocess
 import sys
 import tempfile
@@ -41,6 +41,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("disc", type=Path)
     parser.add_argument("out", type=Path)
+    parser.add_argument("--levels", type=Path, default=None,
+                        help="the levels OpenRAC extracted from DISC (default: OpenRAC's assets/port/rac1/<disc>)")
     parser.add_argument("--editor", type=Path, default=None, help="OpenRAC Editor's checkout or install")
     args = parser.parse_args()
     tools = editor_tools(args.editor)
@@ -65,10 +67,9 @@ def main():
         args.out.mkdir(parents=True, exist_ok=True)
         version = disc_version(disc)
         out = args.out.resolve() / f"openrac-museum-{version}{shared_map.SUFFIX}"
-        extra = {"keep_problems": True} if "keep_problems" in inspect.signature(shared_map.export).parameters else {}
-        done = shared_map.export(project, out, author="OpenRAC", about=ABOUT, disc_path=disc, **extra)
-    print(f"{done['out']}: {done['scenes']} scene(s), {done['patches']} patch(es), {done['game']} game file(s) "
-          f"named, {len(done['own'])} of our own files")
+        done = shared_map.export(project, out, args.levels, author="OpenRAC", about=ABOUT, disc_path=disc,
+                                 keep_problems=True)
+    print(f"{done['out']}: {done['files']} file(s), {done['own_bytes'] / 1e6:.1f} MB of our own bytes")
 
 
 def disc_version(disc):
